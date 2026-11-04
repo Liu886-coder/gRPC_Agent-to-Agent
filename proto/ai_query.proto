@@ -1,0 +1,48 @@
+syntax = "proto3";
+package agent_communication;
+
+message Status { int32 code = 1; string message = 2; }
+message AIQueryRequest {
+  string request_id = 1;
+  string question = 2;
+  string context_id = 3;
+  optional int32 history_length = 4;
+  int32 timeout_seconds = 5;
+}
+message AIQueryResponse {
+  string request_id = 1;
+  Status status = 2;
+  string answer = 3;
+  string agent_id = 4;
+  string task_id = 5;
+  string context_id = 6;
+  int64 processing_time_ms = 7;
+  repeated string tools_used = 8;
+  string provider = 9;
+}
+message AIStreamEvent {
+  string event_id = 1;
+  string event_type = 2;
+  string content = 3;
+  string task_id = 4;
+  string context_id = 5;
+  int64 timestamp = 6;
+}
+message QueryStatusRequest { string task_id = 1; }
+message QueryStatusResponse {
+  Status status = 1;
+  string task_state = 2;
+  string answer = 3;
+  string context_id = 4;
+  string error = 5;
+}
+message Empty {}
+message HealthResponse { bool ready = 1; string message = 2; }
+
+service AIQueryService {
+  rpc Query(AIQueryRequest) returns (AIQueryResponse);
+  rpc QueryStream(AIQueryRequest) returns (stream AIStreamEvent);
+  rpc GetQueryStatus(QueryStatusRequest) returns (QueryStatusResponse);
+  rpc Health(Empty) returns (HealthResponse);
+}
+
