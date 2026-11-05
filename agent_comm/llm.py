@@ -21,10 +21,19 @@ class ModelClient:
         weekday = "一二三四五六日"[now.weekday()]
         system += f"\n对话当前时间：{now:%Y-%m-%d %H:%M}，星期{weekday}，时区 Asia/Shanghai。"
         messages = [{"role": "system", "content": system}]
+        # 如下是记忆列表维护
+        # 把历史对话加入列表
         for message in history:
             messages.append({"role": "assistant" if message["role"] == "agent" else message["role"],
                              "content": "\n".join(part["text"] for part in message["parts"])})
         messages.append({"role": "user", "content": question})
+        # 最终输出结构类似：
+        # [
+        #     {"role": "system",    "content": "你是中文助手。\n对话当前时间：……"},
+        #     {"role": "user",      "content": "我叫小明"},
+        #     {"role": "assistant", "content": "你好，小明！"},
+        #     {"role": "user",      "content": "我叫什么名字"}
+        # ]
         return messages
 
     async def chat(self, messages, **options):
